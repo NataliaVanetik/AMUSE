@@ -20,3 +20,16 @@ Generate summaries with existing model:
 Also stored: 
 
 a model trained on 3000 files named model.training.muse.3000.all.h5
+
+
+If you use this code, please cite:
+
+Litvak M, Vanetik N. Summarization of financial reports with AMUSE. In Proceedings of the 3rd Financial Narrative Processing Workshop 2021 (pp. 31-36).
+
+@inproceedings{litvak2021summarization,
+  title={Summarization of financial reports with AMUSE},
+  author={Litvak, Marina and Vanetik, Natalia},
+  booktitle={Proceedings of the 3rd Financial Narrative Processing Workshop},
+  pages={31--36},
+  year={2021}
+}
