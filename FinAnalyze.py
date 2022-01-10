@@ -125,32 +125,6 @@ def define_parser():
     parser.add_argument('--modelpath', type=str, default='data/models/model.h5', help='file to store trained model')
     return parser
 
-'''
-##############################################################################
-# check existence of directories
-##############################################################################
-def check_directories(args):
-    trainDir = os.path.join(os.getcwd(), args.train)
-    goldDir = os.path.join(os.getcwd(), args.gold)
-    testDir = os.path.join(os.getcwd(), args.test)
-    
-    exists = os.path.isdir(trainDir)
-    if not exists:
-        print("Text directory ",trainDir," does not exist!!!")
-        sys.exit(0)
-        
-    exists = os.path.isdir(goldDir)
-    if not exists:
-        print("Gold directory ",goldDir," does not exist!!!")
-        sys.exit(0)
-        
-    exists = os.path.isdir(testDir)
-    if not exists and args.task=="predict":
-        print("Test directory ",testDir," does not exist, but it is required by the taks!!!")
-        sys.exit(0)
-    return trainDir, goldDir, testDir
-'''
-
 ##############################################################################
 # check existence of a directory
 ##############################################################################
@@ -181,48 +155,6 @@ def read_file_names(trainDir, goldDir, testDir):
         print("Found ",len(trainfiles)," files in the text directory ", testDir)
     return trainfiles, goldfiles, testfiles
 
-'''
-######################################################################
-# generate training and test documents
-######################################################################
-def generate_data(trainfiles, goldfiles, testfiles, args, nlp, nlpT, fullProcessing):
-    # process train and test data, get max sentence number
-    # limit processing to #count files for both train and test
-    maxfiles_train=len(trainfiles)
-    maxfiles_test=len(testfiles)
-    if args.count>=0:
-        maxfiles_train=min(maxfiles_train, args.count)
-    if args.count>=0:    
-        maxfiles_test=min(maxfiles_test, args.count)
-    
-    gold_prefixes=get_prefix_list(goldfiles)
-    sentence_nums=[]
-    trainDocs, testDocs=[], []
-    trainGolds, testGolds=[], []
-    i=0
-    for textFile in trainfiles:
-        print("Processing file #",i,"/",len(trainfiles)," name=",textFile, "full processing=", fullProcessing)
-        doc, golds = processOneDocument(textFile, goldfiles, gold_prefixes, nlp, nlpT, fullProcessing)
-        trainDocs.append(doc)
-        trainGolds.append(golds)
-        sentence_nums.append(len(doc.sentences))
-        i=i+1
-        if i>=maxfiles_train:
-            print("Stopped after ",i," train files")
-            break
-    i=0
-    for textFile in testfiles:
-        doc, golds = processOneDocument(textFile, goldfiles, gold_prefixes, nlp, nlpT, fullProcessing)
-        testDocs.append(doc)
-        testGolds.append(golds)
-        sentence_nums.append(len(doc.sentences))
-        i=i+1
-        if i>=maxfiles_test:
-            print("Stopped after ",i," test files")
-            break
-        
-    return  trainDocs, trainGolds, testDocs,  testGolds, sentence_nums
-'''
 
 ######################################################################
 # generate training documents ONLY
@@ -308,63 +240,6 @@ def get_short_file_names_list(testfiles, args):
         i=i+1
     return  names
 
-'''
-######################################################################
-# generate training and test data for NN
-######################################################################
-def generate_neural_data(trainDocs, trainGolds, testDocs, args):
-    train_X=[]
-    train_Y=[]
-    test_X=[]
-    # process training data
-    for i in range(len(trainDocs)):
-        doc=trainDocs[i]
-        golds=trainGolds[i]
-        doc.computeNodeVectors()
-        doc.computeSentenceLabels(golds)
-        ddata_X=doc.getSentenceData()
-        if DEBUG>0:
-            print("Got train doc ",i,"/",len(trainDocs),"  ",doc.short_name," data of shape ",np.asarray(ddata_X).shape)
-        train_X.extend(ddata_X)
-        
-        ddata_Y=None
-        ddata_Y=doc.getBinarySentenceLabels()
-        if DEBUG>0:
-            print("Got binary labels ",ddata_Y)
-        #else:
-        #    ddata_Y=doc.getSentenceLabels(args.measure)
-        #    if DEBUG>2:
-        #        print("Got doc labels of shape ",np.asarray(ddata_Y).shape)
-        
-        train_Y.extend(ddata_Y)
-        
-        if args.sentences>=0 and len(train_Y)>args.sentences:
-            print("Stopped because MAX=",args.sentences," sentences reached")
-            break
-        
-    # process test data
-    test_sentences=[]
-    test_doc_names=[]
-    for i in range(len(testDocs)):
-        doc = testDocs[i]
-        doc.computeNodeVectors()
-        test_X.extend(doc.getSentenceData())
-        if DEBUG>0:
-            print("Got test doc ",i,"/",len(testDocs),"  ",doc.short_name," data ")
-        for i in range(len(doc.sentences)):
-            test_doc_names.append(doc.short_name)
-            test_sentences.append(doc.sentences[i])
-        # careful - no labels here!!!
-        #print("test_doc_names=",test_doc_names)
-        
-    print("---------------------------------------------------------------")
-    print("Training data size = ",len(train_X)," shape=",np.asarray(train_X).shape," labels shape=",np.asarray(train_Y).shape)
-    if args.task=='predict':
-        print("Test data size     = ",len(test_X))
-    print("---------------------------------------------------------------")    
-        
-    return  train_X, train_Y, test_X, test_sentences, test_doc_names
-'''
 
 ######################################################################
 # generate training data only for NN
